@@ -1,0 +1,229 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Seni Musik Kelas 2</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#d9f3ff,#fce1ff);
+  text-align: center;
+  padding: 15px;
+  color: #333;
+}
+.container {
+  max-width: 650px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 22px;
+  box-shadow: 0 5px 15px #0002;
+}
+h1 { color: #7138a5; }
+.school { color: #087e8b; font-weight: bold; }
+#question {
+  font-size: 21px;
+  font-weight: bold;
+  margin: 20px 0;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 7px 0;
+  border: 2px solid #d7c3ef;
+  border-radius: 12px;
+  background: #faf6ff;
+  font-size: 17px;
+  cursor: pointer;
+}
+button:hover { background: #ead8ff; }
+button:disabled { opacity: 1; }
+.correct {
+  background: #bff2cc !important;
+  border-color: green;
+}
+.wrong {
+  background: #ffd0d0 !important;
+  border-color: red;
+}
+.main {
+  background: #7138a5;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+#feedback {
+  min-height: 55px;
+  font-weight: bold;
+  margin: 15px 0;
+}
+.lamp { font-size: 30px; }
+#result { display: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>🎵 GAME SENI MUSIK 🎵</h1>
+<div class="school">SD N 71 MALTENG</div>
+<h2>Kelas 2 – Mengenal Alat Musik</h2>
+<p>👩‍🏫 Mem Dela</p>
+<p>Jawablah 5 soal berikut dengan benar!</p>
+
+<div id="game">
+<div class="lamp">
+<span id="green">⚪</span>
+<span id="red">⚪</span>
+</div>
+
+<p id="progress"></p>
+<div id="question"></div>
+<div id="answers"></div>
+<div id="feedback"></div>
+<button id="next" class="main" onclick="nextQuestion()" hidden>
+Soal Berikutnya ➜
+</button>
+</div>
+
+<div id="result">
+<h2>🏆 Hebat Sekali!</h2>
+<h1 id="score"></h1>
+<p id="message"></p>
+<button class="main" onclick="restart()">🔄 Main Lagi</button>
+</div>
+
+<p>💜 Belajar Musik Bersama Mem Dela</p>
+</div>
+
+<script>
+const questions = [
+{
+q:"1. Alat musik gitar dimainkan dengan cara ...",
+a:["Dipukul","Dipetik","Ditiup","Digesek"],
+c:1,
+why:"Gitar dimainkan dengan cara dipetik."
+},
+{
+q:"2. Alat musik drum dimainkan dengan cara ...",
+a:["Ditiup","Digesek","Dipukul","Dipetik"],
+c:2,
+why:"Drum dimainkan dengan cara dipukul."
+},
+{
+q:"3. Seruling dimainkan dengan cara ...",
+a:["Ditiup","Dipukul","Dipetik","Digoyangkan"],
+c:0,
+why:"Seruling dimainkan dengan cara ditiup."
+},
+{
+q:"4. Alat musik biola dimainkan dengan cara ...",
+a:["Dipukul","Ditiup","Dipetik","Digesek"],
+c:3,
+why:"Biola dimainkan dengan cara digesek."
+},
+{
+q:"5. Contoh alat musik tradisional dari Maluku adalah ...",
+a:["Sasando","Tifa","Angklung","Saluang"],
+c:1,
+why:"Tifa merupakan salah satu alat musik tradisional Maluku."
+}
+];
+
+let current=0;
+let score=0;
+let answered=false;
+
+function speak(text){
+ if(!("speechSynthesis" in window)) return;
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(text);
+ u.lang="id-ID";
+ speechSynthesis.speak(u);
+}
+
+function showQuestion(){
+ answered=false;
+ let item=questions[current];
+
+ document.getElementById("progress").textContent=
+ "Soal "+(current+1)+" dari 5";
+
+ document.getElementById("question").textContent=item.q;
+ document.getElementById("feedback").textContent="";
+ document.getElementById("green").textContent="⚪";
+ document.getElementById("red").textContent="⚪";
+ document.getElementById("next").hidden=true;
+
+ let box=document.getElementById("answers");
+ box.innerHTML="";
+
+ item.a.forEach((answer,index)=>{
+  let btn=document.createElement("button");
+  btn.textContent=answer;
+  btn.onclick=()=>check(index,btn);
+  box.appendChild(btn);
+ });
+}
+
+function check(index,btn){
+ if(answered)return;
+ answered=true;
+
+ let item=questions[current];
+ let buttons=document.querySelectorAll("#answers button");
+ buttons.forEach(b=>b.disabled=true);
+
+ if(index===item.c){
+  score+=20;
+  btn.classList.add("correct");
+  document.getElementById("green").textContent="🟢";
+  document.getElementById("feedback").textContent=
+  "🎉 Hebat! "+item.why;
+  speak("Hebat! Jawabanmu benar!");
+ }else{
+  btn.classList.add("wrong");
+  buttons[item.c].classList.add("correct");
+  document.getElementById("red").textContent="🔴";
+  document.getElementById("feedback").textContent=
+  "😊 Belum tepat. Jawaban benar: "+item.a[item.c]+". "+item.why;
+  speak("Belum tepat. "+item.why);
+ }
+
+ document.getElementById("next").hidden=false;
+ document.getElementById("next").textContent=
+ current===4?"Lihat Nilai 🏆":"Soal Berikutnya ➜";
+}
+
+function nextQuestion(){
+ if(!answered)return;
+ current++;
+
+ if(current===5){
+  document.getElementById("game").style.display="none";
+  document.getElementById("result").style.display="block";
+  document.getElementById("score").textContent=score+"/100";
+  document.getElementById("message").textContent=
+  score===100?"Luar biasa! Kamu juara! 🌟":
+  score>=60?"Bagus! Terus semangat belajar! ❤️":
+  "Ayo belajar lagi. Kamu pasti bisa! 💪";
+  speak("Permainan selesai. Nilaimu "+score);
+ }else{
+  showQuestion();
+ }
+}
+
+function restart(){
+ current=0;
+ score=0;
+ document.getElementById("result").style.display="none";
+ document.getElementById("game").style.display="block";
+ showQuestion();
+}
+
+showQuestion();
+</script>
+</body>
+</html>
+```
